@@ -24,7 +24,7 @@ const refs = {
   loadMoreBtn.refs.button.addEventListener('click', onLoadMore);
   
   
-   postApiService = new PostApiService();
+   PostApiService = new PostApiService();
   const lightbox = new SimpleLightbox('.gallery__item', {
     captionDelay: 250,
     captionsData: 'alt',
