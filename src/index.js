@@ -5,6 +5,7 @@ import 'simplelightbox/dist/simple-lightbox.min.css';
 import LoadMoreBtn from './js/btn-load-more';
 import PostApiService from './js/api';
 import PageLoadStatus from './js/load-status';
+import formSticky from './js/form-sticky';
 
 
 const refs = {
@@ -22,6 +23,7 @@ const refs = {
   });
   refs.formSearch.addEventListener('submit', onSearch);
   loadMoreBtn.refs.button.addEventListener('click', onLoadMore);
+  window.addEventListener('scroll', formSticky);
   
   
    const postApiService = new PostApiService();
@@ -35,7 +37,7 @@ const refs = {
     rootMargin: '100px',
     treshold: 1,
   };
-  const observer = new IntersectionObserver(onLoading, obsOptions);
+  // const observer = new IntersectionObserver(onLoading, obsOptions);
   
   
   function onSearch(e) {
@@ -51,16 +53,16 @@ const refs = {
   
   function onLoadMore() {
     fetchPosts();
-  
+    console.log('Loading)')
     pageLoadStatus.show();
-    observer.observe(pageLoadStatus.refs.pageLoadStatus);
+    // observer.observe(pageLoadStatus.refs.pageLoadStatus);
   }
   
   // Get posts
   function fetchPosts() {
-    loadMoreBtn.hide();
+    // loadMoreBtn.hide();
     pageLoadStatus.loadingShow();
-  
+    console.log('fetch')
     postApiService.fetchPost().then(data => {
       const curentPage = postApiService.page - 1;
       postApiService.hits = data.totalHits;
@@ -73,13 +75,15 @@ const refs = {
           'Sorry, there are no images matching your search query. Please try again.'
         );
       }
-  
-      if (!data.hits.length) {
+
+      renderPost(data.hits);
+      
+      if (data.hits.length<40) {
         loadMoreBtn.hide();
         pageLoadStatus.lastElemShow();
         return;
       }
-      renderPost(data.hits);
+
       if (curentPage === 1) {
         Notify.success(`Hooray! We found ${postApiService.hits} images.`);
         loadMoreBtn.show();
@@ -117,20 +121,29 @@ const refs = {
   
     refs.gallery.insertAdjacentHTML('beforeend', markupPost);
     lightbox.refresh();
-    
+    smoothScroll()
   }
   
   function clearGallery() {
     refs.gallery.innerHTML = '';
   }
+  function smoothScroll() {
+    const { height: cardHeight } = document
+      .querySelector('.gallery')
+      .firstElementChild.getBoundingClientRect();
   
-
-  
-  async function onLoading(entries) {
-    await entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        console.log(entry.isIntersecting);
-        fetchPosts();
-      }
+    window.scrollBy({
+      top: cardHeight * 2,
+      behavior: 'smooth',
     });
   }
+  
+  
+  // async function onLoading(entries) {
+  //   await entries.forEach(entry => {
+  //     if (entry.isIntersecting) {
+  //       console.log(entries.l);
+  //       fetchPosts();
+  //     }
+  //   });
+  // }
